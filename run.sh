@@ -20,5 +20,5 @@ if [ "$(docker ps -q -f name=hub)" ]; then
     docker stop hub
 fi
 
-echo "Running $IMAGE locally on port 8501..."
-docker run --name hub -p 8501:8501 --rm $IMAGE
+echo "Running $IMAGE locally on port 8502..."
+docker run --name hub -p 8502:8502 --rm $IMAGE
