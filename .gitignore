@@ -25,6 +25,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+.env
 
 # Installer logs
 pip-log.txt
@@ -59,4 +60,28 @@ coverage.xml
 *.sublime-project
 *.sublime-workspace
 
-# Logs and l
+# Logs and local files
+*.log
+*.sqlite3
+*.db
+*.env
+
+# Streamlit
+.streamlit/
+
+# Mac / OS files
+.DS_Store
+Thumbs.db
+
+# PyCharm
+*.iml
+.idea/
+
+# Virtual environment folders
+env/
+venv/
+ENV/
+
+# Misc
+*.bak
+*.swp
