@@ -1,0 +1,56 @@
+services:
+  traefik:
+    image: traefik:v2.11
+    container_name: traefik
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+    ports:
+      - "80:80"
+      - "8081:8081" # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/traefik.yml
+    networks:
+      - sharednet
+
+  rag-frontend:
+    build:
+      context: ./frontend
+    container_name: rag-frontend
+    environment:
+      - NEXT_PUBLIC_KEYCLOAK_URL=http://keycloak:8080
+      - NEXT_PUBLIC_KEYCLOAK_REALM=zabalai
+      - NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=zabalai-app
+      - NEXT_PUBLIC_API_URL=http://rag-backend:8000
+    volumes:
+      - ./frontend:/app
+    command: npm run dev
+    networks:
+      - sharednet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rag-frontend.rule=Host(`rag.localhost.com`)"
+      - "traefik.http.services.rag-frontend.loadbalancer.server.port=3000"
+
+  rag-backend:
+    build:
+      context: ./backend
+    container_name: rag-backend
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+    networks:
+      - sharednet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rag-backend.rule=Host(`api.rag.localhost.com`)"
+      - "traefik.http.services.rag-backend.loadbalancer.server.port=8000"
+
+networks:
+  sharednet:
+    driver: bridge
