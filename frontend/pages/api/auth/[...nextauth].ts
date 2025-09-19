@@ -1,7 +1,5 @@
-
-import NextAuth, { Session } from "next-auth";
+import NextAuth from "next-auth";
 import KeycloakProvider from "next-auth/providers/keycloak";
-import { JWT } from "next-auth/jwt";
 
 export default NextAuth({
   providers: [
@@ -14,20 +12,16 @@ export default NextAuth({
   session: {
     strategy: "jwt",
   },
-  callbacks: {
-    async session({ session, token }: { session: Session; token: JWT }) {
-      session.user = {
-        name: token.name,
-        email: token.email,
-      };
-      return session;
-    },
-    async jwt({ token, account, profile }: { token: JWT; account?: any; profile?: any }) {
-      if (account && profile) {
-        token.name = profile.name || profile.preferred_username;
-        token.email = profile.email;
-      }
-      return token;
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        domain: ".localhost.com", // allows sharing across subdomains
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
+        secure: true,
+      },
     },
   },
 });

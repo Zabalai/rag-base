@@ -1,0 +1,11 @@
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+html, body {
+  background-color: #022c22;
+  color: #f3f3f3;
+}
+
+.prose {
+  background: transparent;
+}

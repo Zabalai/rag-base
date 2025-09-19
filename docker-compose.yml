@@ -1,39 +1,54 @@
+networks:
+  keycloak-network:
+    external: true
+  traefik-network:
+    external: true
+    
 services:
   rag-frontend:
     build:
       context: ./frontend
     container_name: rag-frontend
     environment:
-      - NEXT_PUBLIC_KEYCLOAK_URL=http://keycloak:8080
       - NEXT_PUBLIC_KEYCLOAK_REALM=zabalai
-      - NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=zabalai-app
-      - NEXT_PUBLIC_API_URL=http://rag-backend:8000
-    volumes:
-      - ./frontend:/app
-    command: npm run dev
+      - KEYCLOAK_CLIENT_SECRET=zabalai-app
+      - NEXTAUTH_URL=https://rag.localhost.com
+      - NEXTAUTH_SECRET=l6ksxvk24Zgqp3LyrH79NiAWZh1cHWaGEonZgH+h4dY=
+      - KEYCLOAK_ISSUER=https://keycloak.localhost.com/realms/zabalai
+      - KEYCLOAK_CLIENT_ID=zabalai-app
+      - KEYCLOAK_CLIENT_SECRET=C6PcibKCctCZj4AIwVQwr83JR6mRLORy
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     networks:
-      - sharednet
+      - traefik-network
+      - keycloak-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.rag-frontend.rule=Host(`rag.localhost.com`)"
       - "traefik.http.services.rag-frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.rag-frontend.entrypoints=websecure"
+      - "traefik.http.routers.rag-frontend.service=rag-frontend"
+      - "traefik.http.routers.rag-frontend.tls=true"
+      - "traefik.http.routers.rag-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.rag-frontend.loadbalancer.passhostheader=true"
+      - "traefik.http.routers.rag-frontend.middlewares=compresstraefik"
+      - "traefik.http.middlewares.compresstraefik.compress=true"
+      - "traefik.docker.network=traefik-network"
+    extra_hosts:
+      - "keycloak.localhost.com:host-gateway"
 
-  rag-backend:
-    build:
-      context: ./backend
-    container_name: rag-backend
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
-    env_file:
-      - ./backend/.env
-    volumes:
-      - ./backend:/app
-    networks:
-      - sharednet
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.rag-backend.rule=Host(`api.rag.localhost.com`)"
-      - "traefik.http.services.rag-backend.loadbalancer.server.port=8000"
-
-networks:
-  sharednet:
-    driver: bridge
+  # rag-backend:
+  #   build:
+  #     context: ./backend
+  #   container_name: rag-backend
+  #   command: uvicorn main:app --host 0.0.0.0 --port 8000
+  #   env_file:
+  #     - ./backend/.env
+  #   volumes:
+  #     - ./backend:/app
+  #   networks:
+  #     - traefik-network
+  #     - keycloak-network
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.rag-backend.rule=Host(`api.rag.localhost.com`)"
+  #     - "traefik.http.services.rag-backend.loadbalancer.server.port=8000"
