@@ -9,15 +9,8 @@ services:
     build:
       context: ./frontend
     container_name: rag-frontend
-    environment:
-      - NEXT_PUBLIC_KEYCLOAK_REALM=zabalai
-      - KEYCLOAK_CLIENT_SECRET=zabalai-app
-      - NEXTAUTH_URL=https://rag.localhost.com
-      - NEXTAUTH_SECRET=l6ksxvk24Zgqp3LyrH79NiAWZh1cHWaGEonZgH+h4dY=
-      - KEYCLOAK_ISSUER=https://keycloak.localhost.com/realms/zabalai
-      - KEYCLOAK_CLIENT_ID=zabalai-app
-      - KEYCLOAK_CLIENT_SECRET=C6PcibKCctCZj4AIwVQwr83JR6mRLORy
-      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    env_file:
+      - ./frontend/.env.local
     networks:
       - traefik-network
       - keycloak-network
@@ -36,19 +29,3 @@ services:
     extra_hosts:
       - "keycloak.localhost.com:host-gateway"
 
-  # rag-backend:
-  #   build:
-  #     context: ./backend
-  #   container_name: rag-backend
-  #   command: uvicorn main:app --host 0.0.0.0 --port 8000
-  #   env_file:
-  #     - ./backend/.env
-  #   volumes:
-  #     - ./backend:/app
-  #   networks:
-  #     - traefik-network
-  #     - keycloak-network
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.rag-backend.rule=Host(`api.rag.localhost.com`)"
-  #     - "traefik.http.services.rag-backend.loadbalancer.server.port=8000"

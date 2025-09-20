@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  hashivault:
+    image: hashicorp/vault:1.15.0
+    container_name: hashivault
+    env_file:
+      - ./secret_manager/vault.env
+    ports:
+      - "8200:8200" # Only for local dev, traefik will handle routing
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hashivault.rule=Host(`vault.localhost.com`)"
+      - "traefik.http.services.hashivault.loadbalancer.server.port=8200"
+      - "traefik.http.routers.hashivault.entrypoints=websecure"
+      - "traefik.http.routers.hashivault.service=hashivault"
+      - "traefik.http.routers.hashivault.tls=true"
+      - "traefik.http.routers.hashivault.tls.certresolver=letsencrypt"
+      - "traefik.http.services.hashivault.loadbalancer.passhostheader=true"
+      - "traefik.http.routers.hashivault.middlewares=compresstraefik"
+      - "traefik.http.middlewares.compresstraefik.compress=true"
+      - "traefik.docker.network=traefik-network"
+    extra_hosts:
+      - "vault.localhost.com:host-gateway"
+
+  secret-manager:
+    build:
+      context: ./secret_manager
+    container_name: secret-manager
+    env_file:
+      - ./secret_manager/.env
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.secret-manager.rule=Host(`secret-manager.localhost.com`)"
+      - "traefik.http.services.secret-manager.loadbalancer.server.port=8000"
+      - "traefik.http.routers.secret-manager.entrypoints=websecure"
+      - "traefik.http.routers.secret-manager.service=secret-manager"
+      - "traefik.http.routers.secret-manager.tls=true"
+      - "traefik.http.routers.secret-manager.tls.certresolver=letsencrypt"
+      - "traefik.http.services.secret-manager.loadbalancer.passhostheader=true"
+      - "traefik.http.routers.secret-manager.middlewares=compresstraefik"
+      - "traefik.http.middlewares.compresstraefik.compress=true"
+      - "traefik.docker.network=traefik-network"
+    extra_hosts:
+      - "keycloak.localhost.com:host-gateway"
+      - "vault.localhost.com:host-gateway"
+
+networks:
+  traefik-network:
+    external: true
