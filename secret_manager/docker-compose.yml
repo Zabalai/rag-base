@@ -5,7 +5,7 @@ services:
     image: hashicorp/vault:1.15.0
     container_name: hashivault
     env_file:
-      - ./secret_manager/vault.env
+      - vault.env
     ports:
       - "8200:8200" # Only for local dev, traefik will handle routing
     networks:
@@ -30,7 +30,7 @@ services:
       context: ./secret_manager
     container_name: secret-manager
     env_file:
-      - ./secret_manager/.env
+      - .env
     networks:
       - traefik-network
     labels:

@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: kafka-zookeeper
+    env_file:
+      - .env
+    networks:
+      - traefik-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka-broker
+    depends_on:
+      - zookeeper
+    env_file:
+      - .env
+    networks:
+      - traefik-network
+    ports:
+      - "9092:9092" # For local dev only
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: kafka-zookeeper:2181
+    ports:
+      - "8080:8080"
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kafka-ui.rule=Host(`kafka-ui.localhost.com`)"
+      - "traefik.http.services.kafka-ui.loadbalancer.server.port=8080"
+      - "traefik.http.routers.kafka-ui.entrypoints=websecure"
+      - "traefik.http.routers.kafka-ui.service=kafka-ui"
+      - "traefik.http.routers.kafka-ui.tls=true"
+      - "traefik.http.routers.kafka-ui.tls.certresolver=letsencrypt"
+      - "traefik.http.services.kafka-ui.loadbalancer.passhostheader=true"
+      - "traefik.http.routers.kafka-ui.middlewares=compresstraefik"
+      - "traefik.http.middlewares.compresstraefik.compress=true"
+      - "traefik.docker.network=traefik-network"
+    extra_hosts:
+      - "kafka-ui.localhost.com:host-gateway"
+
+networks:
+  traefik-network:
+    external: true
