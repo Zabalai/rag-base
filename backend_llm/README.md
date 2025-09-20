@@ -20,9 +20,11 @@ Handles LLM queries and answer generation, using retrieved context from vector D
 - Uses context from backend_vector_db for answer generation
 - Returns answers to orchestrator or frontend
 
+
 ## Security
-- Credentials managed via secret_manager
-- Access controls per client/tenant
+- This service authenticates directly to Vault (secret_manager) for its own credentials and secrets.
+- Vault policies grant only the minimum required privileges (principle of least privilege).
+- Access controls per client/tenant.
 
 ## Extensibility
 - Add support for additional LLM providers or answer strategies

@@ -22,9 +22,11 @@ Handles storage, indexing, and retrieval of vector embeddings and document chunk
 - Receives chunks/embeddings from backend_vectorizer
 - Provides semantic search results to backend_llm or orchestrator
 
+
 ## Security
-- Credentials managed via secret_manager
-- Access controls per client/tenant
+- This service authenticates directly to Vault (secret_manager) for its own credentials and secrets.
+- Vault policies grant only the minimum required privileges (principle of least privilege).
+- Access controls per client/tenant.
 
 ## Extensibility
 - Support additional vector DBs or indexing strategies

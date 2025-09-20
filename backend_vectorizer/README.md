@@ -20,9 +20,11 @@ Processes documents to generate chunks and embeddings, preparing data for vector
 - Receives processed documents from backend_doc_processing
 - Outputs chunks/embeddings to backend_vector_db
 
+
 ## Security
-- Credentials managed via secret_manager
-- Access controls per client/tenant
+- This service authenticates directly to Vault (secret_manager) for its own credentials and secrets.
+- Vault policies grant only the minimum required privileges (principle of least privilege).
+- Access controls per client/tenant.
 
 ## Extensibility
 - Add new chunking or embedding strategies

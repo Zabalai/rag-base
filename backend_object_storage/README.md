@@ -24,10 +24,12 @@ Manages file uploads, downloads, and storage integration. Supports MinIO/S3 and 
 - Orchestrator generates presigned URLs and sends them via Kafka messages for secure, time-limited access
 - Stores files in configured backend
 
+
 ## Security
-- Credentials managed via HashiCorp Vault (`secret_manager`)
-- Presigned URLs prevent credential sharing
-- Per-client isolation via buckets/prefixes
+- This service authenticates directly to HashiCorp Vault (secret_manager) for its own credentials and secrets.
+- Vault policies grant only the minimum required privileges (principle of least privilege).
+- Presigned URLs prevent credential sharing.
+- Per-client isolation via buckets/prefixes.
 
 ## Extensibility
 - Implements a storage interface that can be overwritten/extended by each provider (MinIO, S3, Google Drive, etc.)

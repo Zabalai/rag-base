@@ -20,9 +20,11 @@ Ingests, normalizes, and enriches documents, preparing them for chunking, embedd
 - Receives documents from frontend or orchestrator
 - Outputs processed documents to backend_vectorizer
 
+
 ## Security
-- Credentials managed via secret_manager
-- Access controls per client/tenant
+- This service authenticates directly to Vault (secret_manager) for its own credentials and secrets.
+- Vault policies grant only the minimum required privileges (principle of least privilege).
+- Access controls per client/tenant.
 
 ## Extensibility
 - Add new enrichment or normalization steps
