@@ -1,24 +1,33 @@
-# Backend (FastAPI)
+# backend_vector_db
 
-## Setup
+## Overview
+Handles storage, indexing, and retrieval of vector embeddings and document chunks for semantic search and retrieval workflows.
 
-1. Create and activate virtual environment:
-   ```sh
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-2. Install dependencies:
-   ```sh
-   pip install fastapi uvicorn python-keycloak
-   ```
-3. Copy `.env.example` to `.env` and fill in your Keycloak details.
+## Main APIs
+- POST /vectors — Store new vectors/chunks
+- GET /vectors/search — Search for similar vectors
+- GET /vectors/{id} — Retrieve vector/chunk by ID
+- PUT /vectors/{id} — Update vector/chunk
+- DELETE /vectors/{id} — Delete vector/chunk
 
-## Run
+## Configuration
+- VECTOR_DB_URL: Database endpoint
+- VECTOR_DB_AUTH: Credentials (managed via secret_manager)
 
-```sh
-uvicorn main:app --reload
-```
+## Usage
+- Start service and configure database connection
+- Use API to store, search, and manage vectors/chunks
 
-## Endpoints
-- `/api/check-login`: Checks if user is logged in via Keycloak
-- `/api/rag/mock`: Mock RAG response
+## Data Flow
+- Receives chunks/embeddings from backend_vectorizer
+- Provides semantic search results to backend_llm or orchestrator
+
+## Security
+- Credentials managed via secret_manager
+- Access controls per client/tenant
+
+## Extensibility
+- Support additional vector DBs or indexing strategies
+
+## Maintainer
+@yourteam
