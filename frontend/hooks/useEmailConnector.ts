@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { storeConnectorCredentials } from '../api/secrets';
+import { storeEmailConnectorSecret } from '../api/emailConnectorSecret';
 
-export function useConnectorCredentials(connectorId: string, user_id: string) {
-  const [apiKey, setApiKey] = useState("");
-  const [secret, setSecret] = useState("");
+export function useEmailConnector(user_id: string) {
+  const [smtpServer, setSmtpServer] = useState("");
+  const [smtpUser, setSmtpUser] = useState("");
+  const [smtpPassword, setSmtpPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -14,10 +15,10 @@ export function useConnectorCredentials(connectorId: string, user_id: string) {
     setError(null);
     setSuccess(false);
     try {
-      await storeConnectorCredentials({
-        connector: connectorId,
-        api_key: apiKey,
-        secret,
+      await storeEmailConnectorSecret({
+        smtp_server: smtpServer,
+        smtp_user: smtpUser,
+        smtp_password: smtpPassword,
         user_id,
       });
       setSuccess(true);
@@ -29,10 +30,12 @@ export function useConnectorCredentials(connectorId: string, user_id: string) {
   };
 
   return {
-    apiKey,
-    setApiKey,
-    secret,
-    setSecret,
+    smtpServer,
+    setSmtpServer,
+    smtpUser,
+    setSmtpUser,
+    smtpPassword,
+    setSmtpPassword,
     loading,
     error,
     success,

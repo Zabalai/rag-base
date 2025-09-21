@@ -11,14 +11,14 @@ vault_client = hvac.Client(url=VAULT_ADDR, token=VAULT_TOKEN, verify=False)
 
 def store_secret(user_id: str, secret: ObjectStorageSecret):
     vault_client.secrets.kv.v2.create_or_update_secret(
-        mount_point="object-storage",
+        mount_point="connectors",
         path=f"users/{user_id}",
         secret=secret.dict()
     )
 
 def get_secret(user_id: str):
     read_response = vault_client.secrets.kv.v2.read_secret_version(
-        mount_point="object-storage",
+        mount_point="connectors",
         path=f"users/{user_id}"
     )
     return read_response.get("data", {}).get("data")
