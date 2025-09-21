@@ -1,79 +1,55 @@
 import React, { useState } from "react";
-import { useConnectorsSecret } from '../../hooks/useObjectStorageConnector';
-import { useEmailConnector } from '../../hooks/useEmailConnector';
+import { useConnectorSecret, ConnectorField } from '../../hooks/useConnectorSecret';
 import Layout from '../../components/Layout';
 import { ArchiveBoxIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 
 
+const objectStorageFields: ConnectorField[] = [
+  { name: "endpoint", label: "Endpoint", type: "text", required: true },
+  { name: "access_key", label: "Access Key", type: "text", required: true },
+  { name: "secret_key", label: "Secret Key", type: "password", required: true },
+  { name: "bucket", label: "Bucket (optional)", type: "text" },
+];
+
+const connectorFields: Record<string, ConnectorField[]> = {
+  "object-storage": objectStorageFields,
+  "azure-blob": objectStorageFields,
+  "aws-s3": objectStorageFields,
+  "google-drive": objectStorageFields,
+  "email": [
+    { name: "smtp_server", label: "SMTP Server", type: "text", required: true },
+    { name: "smtp_user", label: "SMTP User", type: "text", required: true },
+    { name: "smtp_password", label: "SMTP Password", type: "password", required: true },
+  ],
+};
+
 function ConnectorCredentialsForm({ connectorId, user_id }: { connectorId: string, user_id: string }) {
-  if (connectorId === "email") {
-    const {
-      smtpServer, setSmtpServer,
-      smtpUser, setSmtpUser,
-      smtpPassword, setSmtpPassword,
-      loading, error, success, handleSubmit
-    } = useEmailConnector(user_id);
-    return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold mb-4">Email Credentials</h3>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-medium mb-1">SMTP Server</label>
-            <input type="text" className="w-full border rounded px-3 py-2" value={smtpServer} onChange={e => setSmtpServer(e.target.value)} required />
+  const fields = connectorFields[connectorId] || [];
+  const { values, handleChange, loading, error, success, handleSubmit } = useConnectorSecret(connectorId, fields, user_id);
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <h3 className="text-lg font-semibold mb-4">{connectorId.charAt(0).toUpperCase() + connectorId.slice(1)} Credentials</h3>
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        {fields.map(field => (
+          <div key={field.name}>
+            <label className="block text-sm font-medium mb-1">{field.label}</label>
+            <input
+              type={field.type}
+              className="w-full border rounded px-3 py-2"
+              value={values[field.name]}
+              onChange={e => handleChange(field.name, e.target.value)}
+              required={field.required}
+            />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">SMTP User</label>
-            <input type="text" className="w-full border rounded px-3 py-2" value={smtpUser} onChange={e => setSmtpUser(e.target.value)} required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">SMTP Password</label>
-            <input type="password" className="w-full border rounded px-3 py-2" value={smtpPassword} onChange={e => setSmtpPassword(e.target.value)} required />
-          </div>
-          <button type="submit" className={`w-full py-3 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={loading}>
-            {loading ? 'Saving...' : 'Save'}
-          </button>
-          {error && <div className="text-red-500 mt-2 text-sm">{error}</div>}
-          {success && <div className="text-green-600 mt-2 text-sm">Credentials saved!</div>}
-        </form>
-      </div>
-    );
-  } else {
-    const {
-      endpoint, setEndpoint,
-      accessKey, setAccessKey,
-      secretKey, setSecretKey,
-      bucket, setBucket,
-      loading, error, success, handleSubmit
-    } = useConnectorsSecret(user_id);
-    return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold mb-4">{connectorId.charAt(0).toUpperCase() + connectorId.slice(1)} Credentials</h3>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-medium mb-1">Endpoint</label>
-            <input type="text" className="w-full border rounded px-3 py-2" value={endpoint} onChange={e => setEndpoint(e.target.value)} required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Access Key</label>
-            <input type="text" className="w-full border rounded px-3 py-2" value={accessKey} onChange={e => setAccessKey(e.target.value)} required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Secret Key</label>
-            <input type="password" className="w-full border rounded px-3 py-2" value={secretKey} onChange={e => setSecretKey(e.target.value)} required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Bucket (optional)</label>
-            <input type="text" className="w-full border rounded px-3 py-2" value={bucket} onChange={e => setBucket(e.target.value)} />
-          </div>
-          <button type="submit" className={`w-full py-3 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={loading}>
-            {loading ? 'Saving...' : 'Save'}
-          </button>
-          {error && <div className="text-red-500 mt-2 text-sm">{error}</div>}
-          {success && <div className="text-green-600 mt-2 text-sm">Credentials saved!</div>}
-        </form>
-      </div>
-    );
-  }
+        ))}
+        <button type="submit" className={`w-full py-3 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={loading}>
+          {loading ? 'Saving...' : 'Save'}
+        </button>
+        {error && <div className="text-red-500 mt-2 text-sm">{error}</div>}
+        {success && <div className="text-green-600 mt-2 text-sm">Credentials saved!</div>}
+      </form>
+    </div>
+  );
 }
 
 export default function StorageConfigConnectors() {
