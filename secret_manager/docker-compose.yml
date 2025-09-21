@@ -1,13 +1,17 @@
-version: '3.8'
-
 services:
   hashivault:
+    cap_add:
+      - IPC_LOCK
     image: hashicorp/vault:1.15.0
     container_name: hashivault
-    env_file:
-      - vault.env
-    ports:
-      - "8200:8200" # Only for local dev, traefik will handle routing
+    command: 
+      - server
+    environment:
+      - VAULT_LOG_LEVEL=debug
+    volumes:
+      - ./vault-raft:/vault/raft
+      - ./vault-config:/vault/config
+      - ./vault-tls:/opt/vault/tls
     networks:
       - traefik-network
     labels:
@@ -27,7 +31,7 @@ services:
 
   secret-manager:
     build:
-      context: ./secret_manager
+      context: .
     container_name: secret-manager
     env_file:
       - .env
