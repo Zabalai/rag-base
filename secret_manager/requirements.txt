@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
+starlette
 hvac
 requests
 python-jose

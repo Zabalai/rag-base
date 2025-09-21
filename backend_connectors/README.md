@@ -1,4 +1,4 @@
-# backend_object_storage
+# backend_connectors
 
 ## Overview
 Manages file uploads, downloads, and storage integration. Supports MinIO/S3 and user-provided storage connectors. Provides presigned URLs for secure access. Credentials and secrets are managed via HashiCorp Vault (see `secret_manager`).
