@@ -9,10 +9,15 @@ VAULT_TOKEN = os.getenv("VAULT_TOKEN", "")
 vault_client = hvac.Client(url=VAULT_ADDR, token=VAULT_TOKEN)
 
 def store_secret(user_id: str, secret: ObjectStorageSecret):
-    path = f"users/{user_id}/object-storage"
-    vault_client.secrets.kv.v2.create_or_update_secret(path=path, secret=secret.dict())
+    vault_client.secrets.kv.v2.create_or_update_secret(
+        mount_point="object-storage",
+        path=f"users/{user_id}",
+        secret=secret.dict()
+    )
 
 def get_secret(user_id: str):
-    path = f"users/{user_id}/object-storage"
-    read_response = vault_client.secrets.kv.v2.read_secret_version(path=path)
+    read_response = vault_client.secrets.kv.v2.read_secret_version(
+        mount_point="object-storage",
+        path=f"users/{user_id}"
+    )
     return read_response.get("data", {}).get("data")
