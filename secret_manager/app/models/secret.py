@@ -1,5 +1,6 @@
+
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Union
 
 class ObjectStorageSecret(BaseModel):
     endpoint: str
@@ -11,3 +12,7 @@ class EmailConnectorSecret(BaseModel):
     smtp_server: str
     smtp_user: str
     smtp_password: str
+
+class ConnectorSecret(BaseModel):
+    connector_name: str
+    secret: Union[ObjectStorageSecret, EmailConnectorSecret]

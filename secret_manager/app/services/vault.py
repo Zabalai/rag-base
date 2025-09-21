@@ -9,16 +9,18 @@ VAULT_ADDR = os.getenv("VAULT_ADDR", "https://vault.localhost.com")
 VAULT_TOKEN = os.getenv("VAULT_TOKEN", "")
 vault_client = hvac.Client(url=VAULT_ADDR, token=VAULT_TOKEN, verify=False)
 
-def store_secret(user_id: str, secret: ObjectStorageSecret):
+
+def store_secret(user_id: str, secret, connector_name: str):
     vault_client.secrets.kv.v2.create_or_update_secret(
         mount_point="connectors",
-        path=f"users/{user_id}",
+        path=f"users/{user_id}/{connector_name}",
         secret=secret.dict()
     )
 
-def get_secret(user_id: str):
+
+def get_secret(user_id: str, connector_name: str):
     read_response = vault_client.secrets.kv.v2.read_secret_version(
         mount_point="connectors",
-        path=f"users/{user_id}"
+        path=f"users/{user_id}/{connector_name}"
     )
     return read_response.get("data", {}).get("data")

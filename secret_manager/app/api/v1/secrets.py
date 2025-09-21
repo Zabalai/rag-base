@@ -1,23 +1,22 @@
+
 from fastapi import APIRouter, HTTPException
-from app.models.secret import ObjectStorageSecret, EmailConnectorSecret
+from app.models.secret import ConnectorSecret
 from app.services.vault import store_secret, get_secret
 
 router = APIRouter()
 
-@router.post("/secrets/object-storage", status_code=201)
-def store_object_storage_secret(secret: ObjectStorageSecret, user_id: str):
-    store_secret(user_id, secret)
-    return {"message": "Secret stored successfully."}
+# Unified POST endpoint for connectors
+@router.post("/secrets/connector", status_code=201)
+def store_connector_secret(payload: ConnectorSecret, user_id: str):
+    connector_name = payload.connector_name
+    secret = payload.secret
+    store_secret(user_id, secret, connector_name)
+    return {"message": f"{connector_name} secret stored successfully."}
 
-@router.get("/secrets/connectors-secret")
-def get_connectors_secret(user_id: str):
-    secret = get_secret(user_id)
+# Unified GET endpoint for connectors
+@router.get("/secrets/connector")
+def get_connector_secret(connector_name: str, user_id: str):
+    secret = get_secret(user_id, connector_name)
     if not secret:
         raise HTTPException(status_code=404, detail="Secret not found.")
     return secret
-
-# Email connector
-@router.post("/secrets/email", status_code=201)
-def store_email_connector_secret(secret: EmailConnectorSecret, user_id: str):
-    store_secret(user_id, secret)
-    return {"message": "Email secret stored successfully."}
